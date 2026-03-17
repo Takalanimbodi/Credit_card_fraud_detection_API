@@ -113,17 +113,23 @@ def run_prediction(tx: TransactionEvent):
 # Fake transaction generator
 
 def generate_fake_transaction() -> TransactionEvent:
+    is_fraud_scenario = random.random() < 0.1  # only 10% suspicious
+
     return TransactionEvent(
-        amount=round(random.uniform(10, 5000), 2),
+        amount=round(random.uniform(10, 500), 2) if not is_fraud_scenario 
+               else round(random.uniform(1000, 5000), 2),
         merchant_category=random.choice(MERCHANT_CATEGORIES),
         timestamp=datetime.now().isoformat(),
-        location_mismatch=random.choice([0, 1]),
-        foreign_transaction=random.choice([0, 1]),
-        device_trust_score=round(random.uniform(0, 1), 2),
-        velocity_last_24h=random.randint(0, 15),
+        location_mismatch=random.choices([0, 1], weights=[90, 10])[0] if not is_fraud_scenario
+                          else random.choices([0, 1], weights=[20, 80])[0],
+        foreign_transaction=random.choices([0, 1], weights=[85, 15])[0] if not is_fraud_scenario
+                            else random.choices([0, 1], weights=[30, 70])[0],
+        device_trust_score=round(random.uniform(0.6, 1.0), 2) if not is_fraud_scenario
+                           else round(random.uniform(0.0, 0.4), 2),
+        velocity_last_24h=random.randint(0, 3) if not is_fraud_scenario
+                          else random.randint(8, 15),
         cardholder_age=random.randint(18, 75)
     )
-
 # Endpoints
 
 
